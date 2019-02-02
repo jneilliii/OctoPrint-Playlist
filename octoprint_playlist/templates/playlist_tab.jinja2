@@ -1,0 +1,58 @@
+<form class="form-horizontal">
+    <div class="row-fluid">
+        <div class="span8"><h5>{{ _('Filename') }}</h5></div>
+		<div class="span2" style="text-align: center;"><h5>{{ _('Time') }}</h5></div>
+        <div class="span2" style="text-align: center;"><h5>{{ _('Actions') }}</h5></div>
+    </div>
+    <div data-bind="sortable: { data: queuedPrints, isEnabled: loginState.isUser, options: { cancel: '.unsortable'} }">
+        <div class="row-fluid" style="margin-bottom: 5px" data-bind="style: { cursor: ($parent.loginState.isUser() && id() !== $parent.current_file()) ? 'move' : '' }, css: { unsortable: id() == $parent.current_file() }">
+            <div class="span8">
+                <div data-bind="text: fileName, style: { 'font-weight': id() === $parent.current_file() && ($parent.printerState.isPrinting() || $parent.printerState.isPaused()) ? 'bold' : 'normal' }"></div>
+            </div>
+            <div class="span2" style="text-align: center;">
+                <div data-bind="text: print_time, style: { 'font-weight': id() === $parent.current_file() && ($parent.printerState.isPrinting() || $parent.printerState.isPaused()) ? 'bold' : 'normal'}"></div>
+            </div>
+            <div class="span2" style="text-align: center;">
+                <div class="btn-group action-buttons" style="margin-top: 5px;">
+                    <button class="btn btn-mini moveJobUp" data-bind="click: $parent.moveJobUp, enable: $parent.loginState.isUser() && $index() !== 0 && id() !== $parent.current_file()" title="Move file up playlist">
+                        <i class="fa fa-arrow-up"></i>
+                    </button>
+                    <button class="btn btn-mini moveJobDown" data-bind="click: $parent.moveJobDown, enable: $parent.loginState.isUser() && $index() !== $parent.queuedPrints().length - 1 && id() !== $parent.current_file()" title="Move file down playlist">
+                        <i class="fa fa-arrow-down"></i>
+                    </button>
+                    <button class="btn btn-mini btn-danger removeJob" data-bind="click: $parent.removeJob, enable: $parent.loginState.isUser() && id() !== $parent.current_file()" title="Remove file from playlist">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row-fluid">
+        <small class="muted">Hint: You can add files to the playlist using the <i class="fa fa-list"></i> button in the Files list on the left.</small>
+    </div>
+    <br/>
+    <div class="row-fluid" data-bind="style: { display: loginState.isUser() ? 'block' : 'none' }">
+        <div class="span12">
+            <button class="btn btn-primary" data-bind="click: startQueue, enable: queuedPrints().length !== 0 && printerState.isOperational() && loginState.isUser() && !(printerState.isPrinting() || printerState.isPaused())" title="Start printing playlist">
+                <i class="fa fa-play"></i>&nbsp;&nbsp;{{ _('Play') }}
+            </button>
+            <button class="btn btn-danger" data-bind="click: clearQueue, enable: queuedPrints().length !== 0" title="Empty the playlist">
+                {{ _('Clear') }}
+            </button>
+        </div>
+    </div>
+    <br/>
+    <div class="control-group">
+        <label class="checkbox">
+            <div title="{{ _('Check this to loop playlist indefinitely.') }}">
+                <input type="checkbox" data-bind="checked: auto_repeat_queue, enable: queuedPrints().length !== 0 && loginState.isUser()"/> {{ _('Repeat') }}
+            </div>
+        </label>
+        <label class="checkbox">
+            <div title="{{ _('Check this to start playlist at configured time of day') }}">
+                <input type="checkbox" data-bind="checked: autoStartQueue, enable: queuedPrints().length !== 0 && loginState.isUser()"/> {{ _('Play at') }} <input type="time" style="width: 100px;" data-bind="value: start_time, enable: queuedPrints().length !== 0 && loginState.isUser() && autoStartQueue()" title="Time of day to play."/>
+            </div>
+        </label>
+    </div>
+</form>
+

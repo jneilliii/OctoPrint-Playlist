@@ -1,0 +1,28 @@
+<h3>{{ _('Playlist') }}</h3>
+<form class="form-horizontal">
+    <div class="control-group">
+        <label class="control-label">{{ _('GCODE between files') }}</label>
+        <div class="controls">
+            <textarea rows="6" class="block" data-bind="value: settings.plugins.playlist.bed_clear_script"></textarea>
+            <span class="help-inline">{{ _("This script needs to completely clear the print off the bed so that the printer is ready for the next print. Understand that if the bed isn't clear the hotend is going to crash into the previously printed object and quite possibly break your printer. It is highly recommended that you put a pause command (M226, M600, etc.) in the script so you can inspect the bed before resuming and starting the next print.") }}</span>
+        </div>
+        <label class="control-label">{{ _('Strip start of file up to until this line') }}</label>
+        <div class="controls">
+        	<input type="text" class="input-block-level" data-bind="value: settings.plugins.playlist.strip_start_marker">
+        	<span class="help-inline"></span>
+        </div>
+        <label class="control-label">{{ _('Strip end of file after this line') }}</label>
+        <div class="controls">
+        	<input type="text" class="input-block-level" data-bind="value: settings.plugins.playlist.strip_end_marker">
+            <span class="help-inline">{{ _("These two settings can be used to strip parts of end gcode that would unnecessarily cool down the bed and extruder(s), as well as perform rehoming/releveling between prints. Ideally you would place markers in the start- and end-gcode snippets in your slicer to detect here. The first start gcode and the last end gcode bits of the queue are kept intact.") }}</span>
+        </div>
+        <label class="control-label">{{ _('Pause playback at: ') }}</label>
+        <div class="controls">
+        	<input type="time" style="width: 100px;" data-bind="value: settings.plugins.playlist.blackout_start_time" title="Time of day to pause printing of the playlist">
+        </div>
+        <label class="control-label">{{ _('Resume playback at: ') }}</label>
+        <div class="controls">
+        	<input type="time" style="width: 100px;" data-bind="value: settings.plugins.playlist.blackout_stop_time" title="Time of day to resume printing of the playlist">
+        </div>
+    </div>
+</form>
