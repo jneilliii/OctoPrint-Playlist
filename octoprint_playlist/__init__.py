@@ -320,6 +320,8 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 		)
 
 __plugin_name__ = "Playlist"
+__plugin_pythoncompat__ = ">=2.7,<4"
+
 def __plugin_load__():
 	global __plugin_implementation__
 	__plugin_implementation__ = PlaylistPlugin()
