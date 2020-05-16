@@ -315,7 +315,7 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 				current=self._plugin_version,
 
 				# update method: pip
-				pip="https://github.com/jneilliii/OctoPrint-PrintQueues/archive/{target_version}.zip"
+				pip="https://github.com/jneilliii/OctoPrint-Playlist/archive/{target_version}.zip"
 			)
 		)
 
