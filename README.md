@@ -36,7 +36,7 @@ If you experience issues with this plugin or need assistance please go to the is
 Check out my other plugins [here](https://plugins.octoprint.org/by_author/#jneilliii)
 
 ### Support My Efforts
-I, jneilliii, programmed this plugin for fun and do my best effort to support those that have issues with it, please return the favor and leave me a tip if you find this plugin helpful.
+I, jneilliii, programmed this plugin for fun and do my best effort to support those that have issues with it, please return the favor and leave me a tip if you find this plugin helpful. 
 
 [![paypal](paypal-with-text.png)](https://paypal.me/jneilliii)
 
