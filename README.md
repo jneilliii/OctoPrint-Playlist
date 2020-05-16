@@ -1,5 +1,7 @@
 # OctoPrint-Playlist
 
+![GitHub Downloads](https://badgen.net/github/assets-dl/jneilliii/OctoPrint-Playlist/)
+
 This plugin will allow you to create a playlist of gcode files that will automatically play one after another with a configured set of gcode commands in between. There are options for configuring "black out" windows where the printing does not occur, and a start time for when to automatically start the playlist.
 
 To add files to the playlist, press the newly created "Add to Playlist" button in OctoPrint's file list.
