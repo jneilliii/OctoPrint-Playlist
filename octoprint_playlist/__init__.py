@@ -144,7 +144,7 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 	# AssetPlugin
 	def get_assets(self):
 		return dict(
-			js=["js/jquery-ui.min.js", "js/knockout-sortable.js", "js/playlist.js"]
+			js=["js/jquery-ui.min.js", "js/knockout-sortable.1.2.0.js", "js/playlist.js"]
 	)
 
 
