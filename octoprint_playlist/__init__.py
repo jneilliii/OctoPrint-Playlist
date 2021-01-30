@@ -8,22 +8,23 @@ from octoprint.server.util.flask import restricted_access
 from octoprint.util.comm import process_gcode_line
 from octoprint.util import RepeatedTimer
 
-import flask, json
+import flask
+import json
 import os.path
 
-class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
-	octoprint.plugin.SettingsPlugin,
-	octoprint.plugin.AssetPlugin,
-	octoprint.plugin.BlueprintPlugin,
-	octoprint.plugin.EventHandlerPlugin):
 
+class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
+					 octoprint.plugin.SettingsPlugin,
+					 octoprint.plugin.AssetPlugin,
+					 octoprint.plugin.BlueprintPlugin,
+					 octoprint.plugin.EventHandlerPlugin):
 	_playlist = []
 	_current_file = ""
 	_repeatedtimer = None
 	_print_completed = False
 	_uploads_dir = settings().getBaseFolder("uploads")
 
-	_insert_bed_clear_script = False # set after ending a print when there are still prints in the queue
+	_insert_bed_clear_script = False  # set after ending a print when there are still prints in the queue
 	_stripping_start = False  # set after completion of first print in queue
 	_stripping_end = False  # unset after completion of any print
 
@@ -32,7 +33,6 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 	_strip_end_marker = ""
 
 	_process_gcode_line_super = None
-
 
 	# BluePrintPlugin (api requests)
 	@octoprint.plugin.BlueprintPlugin.route("/queue", methods=["GET"])
@@ -69,7 +69,7 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 		if self._playlist != last_playlist:
 			self._send_queue_to_clients()
 
-		if state  == "OPERATIONAL" and self._settings.get(["auto_start_queue"]):
+		if state == "OPERATIONAL" and self._settings.get(["auto_start_queue"]):
 			self._print_from_queue()
 
 		return flask.make_response("POST successful", 200)
@@ -95,7 +95,6 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 			self._logger.info("attempting to select and print file: " + f)
 			# self._settings.set(['playlist'], [self._playlist])
 			self._printer.select_file(f, False, True)
-
 
 	def _send_queue_to_clients(self):
 		self._plugin_manager.send_plugin_message(self._identifier, dict(
@@ -128,7 +127,7 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 			strip_end_marker="",
 			auto_start_queue=False,
 			auto_queue_files=False,
-			playlist = [],
+			playlist=[],
 			start_time="",
 			blackout_start_time="",
 			blackout_stop_time="",
@@ -143,13 +142,11 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 
 	# AssetPlugin
 	def get_assets(self):
-		return dict(
-			js=["js/jquery-ui.min.js", "js/knockout-sortable.js", "js/playlist.js"]
-	)
-
+		return dict(js=["js/jquery-ui.min.js", "js/knockout-sortable.js", "js/playlist.js"])
 
 	# Hooks
-	def alter_start_and_end_gcode(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
+	def alter_start_and_end_gcode(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args,
+								  **kwargs):
 		if self._insert_bed_clear_script:
 			self._insert_bed_clear_script = False
 			bed_clear_script = self._settings.get(["bed_clear_script"])
@@ -160,10 +157,9 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 				result.append((cmd,))
 
 			if not result:
-				result = (None, )
+				result = (None,)
 
 			return result
-
 
 		if self._stripping_start:
 			print("stripped from start: %s" % cmd)
@@ -173,7 +169,7 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 			print("stripped from end: %s" % cmd)
 			return None,  # strip this line
 
-		return # leave gcode as is
+		return  # leave gcode as is
 
 	# NB: Here be dragons!
 	# This is a hack to get at the gcode line before comments are stripped
@@ -196,28 +192,30 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 
 		return self._process_gcode_line_super(line, offsets=offsets, current_tool=current_tool)
 
-
 	# Event Handling
 	def on_event(self, event, payload):
-		if event in ("Startup","SettingsUpdated"):
+		if event in ("Startup", "SettingsUpdated"):
 			self._logger.info("Clearing scheduled jobs.")
 			schedule.clear("playlist")
 			schedule.clear("blackout_start_time")
 			schedule.clear("blackout_stop_time")
 			if self._settings.get(["auto_start_queue"]) and self._settings.get(["start_time"]) != "":
 				self._logger.info("Scheduling print queue for %s." % self._settings.get(["start_time"]))
-				schedule.every().day.at(self._settings.get(["start_time"])).do(self._create_and_print_queue).tag("playlist")
+				schedule.every().day.at(self._settings.get(["start_time"])).do(self._create_and_print_queue).tag(
+					"playlist")
 
 			if self._settings.get(["blackout_start_time"]) and self._settings.get(["blackout_start_time"]) != "":
 				self._logger.info("Scheduling blackout start for %s." % self._settings.get(["blackout_start_time"]))
-				schedule.every().day.at(self._settings.get(["blackout_start_time"])).do(self._pause_print_queue).tag("blackout_start_time")
+				schedule.every().day.at(self._settings.get(["blackout_start_time"])).do(self._pause_print_queue).tag(
+					"blackout_start_time")
 
 			if self._settings.get(["blackout_stop_time"]) and self._settings.get(["blackout_stop_time"]) != "":
 				self._logger.info("Scheduling blackout stop for %s." % self._settings.get(["blackout_stop_time"]))
-				schedule.every().day.at(self._settings.get(["blackout_stop_time"])).do(self._resume_print_queue).tag("blackout_stop_time")
+				schedule.every().day.at(self._settings.get(["blackout_stop_time"])).do(self._resume_print_queue).tag(
+					"blackout_stop_time")
 
 			if not self._repeatedtimer:
-				self._repeatedtimer = RepeatedTimer(60,schedule.run_pending)
+				self._repeatedtimer = RepeatedTimer(60, schedule.run_pending)
 				self._repeatedtimer.start()
 
 			if len(self._playlist) > 0:
@@ -242,7 +240,7 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 			new_queue = [f for f in self._playlist if f != payload["path"]]
 			new_queues = [f for f in self._settings.get(["playlist"]) if f["fileName"] != payload["path"]]
 			if new_queues != self._settings.get(["playlist"]):
-				self._settings.set(["playlist"],new_queues)
+				self._settings.set(["playlist"], new_queues)
 				self._playlist = new_queue
 				self._settings.save()
 				self._plugin_manager.send_plugin_message(self._identifier, dict(
@@ -262,13 +260,13 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 			self._print_completed = False
 
 			if not self._playlist or self._playlist[0]["fileName"] != payload["path"]:
-				self._playlist.insert(0, dict(fileName=payload["path"],id="0"))
+				self._playlist.insert(0, dict(fileName=payload["path"], id="0"))
 				self._send_queue_to_clients()
 			if len(self._playlist) > 0:
 				self._current_file = self._playlist[0]["id"]
 				self._send_queue_to_clients()
 
-		if event == "PrintDone":
+		if event in "PrintDone":
 			self._print_completed = True
 			self._stripping_start = False
 			self._stripping_end = False
@@ -277,11 +275,11 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 			state = self._printer.get_state_id()
 			self._logger.info("printer state: " + state)
 
-			if state  == "OPERATIONAL":
+			if state == "OPERATIONAL":
 				self._stripping_start = False
 				self._stripping_end = False
 
-				if self._print_completed and len(self._playlist) > 0:
+				if len(self._playlist) > 0:
 					self._playlist.pop(0)
 					if len(self._playlist) == 0:
 						self._current_file = ""
@@ -300,9 +298,6 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 		return
 
 	def get_update_information(self):
-		# Define the configuration for your plugin to use with the Software Update
-		# Plugin here. See https://github.com/foosel/OctoPrint/wiki/Plugin:-Software-Update
-		# for details.
 		return dict(
 			playlist=dict(
 				displayName="Playlist",
@@ -313,14 +308,26 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 				user="jneilliii",
 				repo="OctoPrint-Playlist",
 				current=self._plugin_version,
+				stable_branch=dict(
+					name="Stable", branch="master", comittish=["master"]
+				),
+				prerelease_branches=[
+					dict(
+						name="Release Candidate",
+						branch="rc",
+						comittish=["rc", "master"],
+					)
+				],
 
 				# update method: pip
 				pip="https://github.com/jneilliii/OctoPrint-Playlist/releases/latest/download/{target_version}.zip"
 			)
 		)
 
+
 __plugin_name__ = "Playlist"
 __plugin_pythoncompat__ = ">=2.7,<4"
+
 
 def __plugin_load__():
 	global __plugin_implementation__
