@@ -22,7 +22,7 @@ $(function() {
 				});
 				return files;
 			},self);
-			
+
 		self.currentlyPrintingQueue = false;
 
 		self.autoStartQueue = ko.observable(false);
@@ -110,9 +110,9 @@ $(function() {
 				});
 			});
 		}
-		
+
 		self.get_print_time = function(data) {
-			var t = data.statistics ? data.statistics.averagePrintTime["_default"] : data.gcodeAnalysis.estimatedPrintTime,
+			var t = data.statistics ? data.statistics.averagePrintTime["_default"] : data.gcodeAnalysis ? data.gcodeAnalysis["estimatedPrintTime"] : '',
 				d = Math.floor(t/86400),
 				h = ('0'+Math.floor(t/3600) % 24).slice(-2),
 				m = ('0'+Math.floor(t/60)%60).slice(-2),
