@@ -88,6 +88,8 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 		return flask.make_response("POST successful", 200)
 
 	def _print_from_queue(self):
+		if len(self._playlist) == 0:
+			self._playlist = self._settings.get(["playlist"])
 		if len(self._playlist) > 0:
 			self._logger.info(self._playlist)
 			self._current_file = self._playlist[0]["id"]
