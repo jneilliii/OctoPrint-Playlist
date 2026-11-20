@@ -3,14 +3,12 @@ from __future__ import absolute_import
 
 import octoprint.plugin
 import schedule
-from octoprint.settings import settings
 from octoprint.server.util.flask import restricted_access
 from octoprint.util.comm import process_gcode_line
 from octoprint.util import RepeatedTimer
 
 import flask
 import json
-import os.path
 
 
 class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
@@ -22,7 +20,6 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 	_current_file = ""
 	_repeatedtimer = None
 	_print_completed = False
-	_uploads_dir = settings().getBaseFolder("uploads")
 
 	_insert_bed_clear_script = False  # set after ending a print when there are still prints in the queue
 	_stripping_start = False  # set after completion of first print in queue
@@ -93,7 +90,9 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 		if len(self._playlist) > 0:
 			self._logger.info(self._playlist)
 			self._current_file = self._playlist[0]["id"]
-			f = os.path.join(self._uploads_dir, self._playlist[0]["fileName"])
+			# OctoPrint 2.0 requires a storage-relative path; older versions
+			# accepted this too (absolute paths only worked via os.path.join quirks).
+			f = self._playlist[0]["fileName"]
 			self._logger.info("attempting to select and print file: " + f)
 			# self._settings.set(['playlist'], [self._playlist])
 			self._printer.select_file(f, False, True)
@@ -176,11 +175,17 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 	# NB: Here be dragons!
 	# This is a hack to get at the gcode line before comments are stripped
 	def _patch_current_file_process(self):
-		if not self._printer._comm._currentFile or self._printer._comm._currentFile._process == self._process_gcode_line:
-			return
+		# _comm is deprecated in OctoPrint 2.0 and only available with the serial connector
+		try:
+			comm = getattr(self._printer, "_comm", None)
+			current_file = getattr(comm, "_currentFile", None)
+			if not current_file or current_file._process == self._process_gcode_line:
+				return
 
-		self._process_gcode_line_super = self._printer._comm._currentFile._process
-		self._printer._comm._currentFile._process = self._process_gcode_line
+			self._process_gcode_line_super = current_file._process
+			current_file._process = self._process_gcode_line
+		except Exception as e:
+			self._logger.warning("Unable to hook gcode processing, start/end marker stripping disabled: %s" % e)
 
 	def _process_gcode_line(self, line, offsets, current_tool):
 		stripped_line = line.rstrip()
@@ -328,7 +333,7 @@ class PlaylistPlugin(octoprint.plugin.TemplatePlugin,
 
 
 __plugin_name__ = "Playlist"
-__plugin_pythoncompat__ = ">=2.7,<4"
+__plugin_pythoncompat__ = ">=3.9,<4"
 
 
 def __plugin_load__():
